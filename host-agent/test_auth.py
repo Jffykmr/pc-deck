@@ -74,3 +74,22 @@ def test_brute_force_burns_code():
     for _ in range(5):
         client.post("/api/pair", json={"code": wrong})
     assert client.post("/api/pair", json={"code": code}).status_code == 403
+
+
+def test_loopback_check_resists_dns_rebinding():
+    from starlette.requests import Request
+
+    def req(host, origin=None, client="127.0.0.1"):
+        headers = [(b"host", host.encode())]
+        if origin:
+            headers.append((b"origin", origin.encode()))
+        return Request({"type": "http", "headers": headers, "client": (client, 50000)})
+
+    assert agent._is_loopback(req("localhost:8080"))
+    assert agent._is_loopback(req("127.0.0.1"))
+    assert agent._is_loopback(req("[::1]:80", client="::1"))
+    assert agent._is_loopback(req("localhost", origin="http://localhost"))
+    assert not agent._is_loopback(req("evil.example"))  # rebound domain
+    assert not agent._is_loopback(req("evil.example:80"))
+    assert not agent._is_loopback(req("localhost", origin="http://evil.example"))
+    assert not agent._is_loopback(req("localhost", client="192.168.1.20"))

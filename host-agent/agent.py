@@ -152,9 +152,30 @@ def _check_query_token(token: str) -> None:
         raise HTTPException(status_code=401, detail="Dispositivo non abbinato")
 
 
+_LOCAL_NAMES = {"127.0.0.1", "localhost", "[::1]", "::1"}
+
+
 def _is_loopback(request: Request) -> bool:
-    host = request.client.host if request.client else ""
-    return host in {"127.0.0.1", "::1", "localhost"}
+    """Request made on the PC itself, to a local address.
+
+    The client address alone is not enough: with DNS rebinding a web page on the PC
+    can reach 127.0.0.1 under its own domain name. That shows in the Host header,
+    and a cross-site fetch also carries a foreign Origin, so check both.
+    """
+    client = request.client.host if request.client else ""
+    if client not in {"127.0.0.1", "::1"}:
+        return False
+    host = request.headers.get("host", "")
+    name = host.rsplit(":", 1)[0] if not host.startswith("[") else host.split("]")[0] + "]"
+    if name.lower() not in _LOCAL_NAMES:
+        return False
+    origin = request.headers.get("origin")
+    if origin:
+        o = origin.split("://", 1)[-1]
+        oname = o.rsplit(":", 1)[0] if not o.startswith("[") else o.split("]")[0] + "]"
+        if oname.lower() not in _LOCAL_NAMES:
+            return False
+    return True
 
 
 auth = [Depends(require_token)]
