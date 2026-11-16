@@ -127,6 +127,10 @@ function useLiveSocket(enabled: boolean, onClosed: () => void) {
         } catch {
           return;
         }
+        if ((data as { paired?: boolean }).paired === false) {
+          onClosedRef.current(); // token revoked: back to the pairing screen
+          return;
+        }
         const now = Date.now();
         const incoming = (data as { build?: string }).build;
         if (incoming) {

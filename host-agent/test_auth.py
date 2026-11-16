@@ -38,8 +38,10 @@ def test_unpaired_is_rejected(method, path):
 
 
 def test_ws_rejected():
-    with pytest.raises(WebSocketDisconnect):
-        with client.websocket_connect("/ws?token=wrong") as ws:
+    with client.websocket_connect("/ws?token=wrong") as ws:
+        first = ws.receive_json()
+        assert set(first) == {"build", "paired"} and first["paired"] is False
+        with pytest.raises(WebSocketDisconnect):
             ws.receive_text()
 
 

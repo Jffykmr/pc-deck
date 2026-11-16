@@ -511,6 +511,11 @@ async def put_config(config: dict):
 @app.websocket("/ws")
 async def ws_state(websocket: WebSocket):
     if not pairing.check(websocket.query_params.get("token", "")):
+        # Tell the page which UI build is current, then refuse. Pages still running an
+        # older UI reload on a new build id, which gets them to the pairing screen
+        # instead of retrying forever. Nothing else is sent.
+        await websocket.accept()
+        await websocket.send_json({"build": _build_id(), "paired": False})
         await websocket.close(code=4401)
         return
     await websocket.accept()

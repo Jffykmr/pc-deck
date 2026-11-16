@@ -11,7 +11,7 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["icons/icon-192.png", "icons/icon-512.png"],
       workbox: {
-        navigateFallbackDenylist: [/^\/api/, /^\/ws/],
+        navigateFallbackDenylist: [/^\/api/, /^\/ws/, /^\/pair/],
         runtimeCaching: [],
       },
       manifest: {
