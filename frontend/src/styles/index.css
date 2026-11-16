@@ -1,0 +1,148 @@
+@import "@fontsource-variable/archivo/wdth.css";
+@import "@fontsource-variable/geist-mono";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tastiera: the deck is a desk instrument, a bank of physical keys.
+   Warm charcoal body, matte keycaps with a hard lip underneath (no blur, no gradient),
+   one lamp colour at a time: the brand colour of the app in the foreground.
+   Flat fills and hard 1-colour edges are also what the tablet GPU draws without flicker. */
+:root {
+  --bg: 22 22 21;
+  --surface: 32 32 30;
+  --raised: 47 47 44;
+  --lip: 10 10 9;
+  --ink: 238 235 228;
+  --muted: 160 157 150;
+  --faint: 106 104 98;
+  --tint: 242 107 33;
+  --accent: 242 107 33;
+  --on: 22 22 21; /* readable ink on the tint field */
+  --danger: 255 94 82;
+  --line: 255 255 255;
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-bg font-sans text-ink antialiased;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none; /* Safari still needs the prefix */
+  user-select: none;
+  -webkit-touch-callout: none; /* no long-press menu on iPad */
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+input,
+textarea,
+select {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+@layer components {
+  /* Body plate: a flat housing section. */
+  .panel {
+    @apply relative rounded-tile;
+    background: rgb(var(--surface));
+    transform: translateZ(0);
+    contain: layout paint;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.05);
+  }
+  /* Keycap: raised face, hard lip below. Pressing sinks it onto the lip and lights it. */
+  .key {
+    @apply relative rounded-[18px] text-ink;
+    background: rgb(var(--raised));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.09), 0 4px 0 rgb(var(--lip));
+    transform: translateY(0);
+  }
+  .key:active {
+    transform: translateY(3px);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.09), 0 1px 0 rgb(var(--lip));
+    background: rgb(var(--tint));
+    color: rgb(var(--on));
+  }
+  /* Smaller control sharing the keycap grammar. */
+  .ctl {
+    @apply rounded-ctl text-ink;
+    background: rgb(var(--raised));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 2px 0 rgb(var(--lip));
+  }
+  .ctl:active {
+    transform: translateY(2px);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08), 0 0 0 rgb(var(--lip));
+    background: rgb(var(--tint));
+    color: rgb(var(--on));
+  }
+  /* Lamp on a key: dim until the key is pressed. */
+  .lamp {
+    @apply h-[7px] w-[7px] rounded-full;
+    background: rgb(255 255 255 / 0.16);
+  }
+  .key:active .lamp {
+    background: rgb(var(--on));
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Condensed grotesk from the same variable font: Archivo at its narrow width axis. */
+  .display {
+    font-family: "Archivo Variable", system-ui, sans-serif;
+    font-stretch: 75%;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .field {
+    @apply w-full rounded-ctl bg-bg px-3 py-2.5 text-[15px] text-ink outline-none;
+    box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / 0.12);
+  }
+  .field:focus {
+    box-shadow: inset 0 0 0 2px rgb(var(--tint));
+  }
+  .field::placeholder {
+    @apply text-faint;
+  }
+  .label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.14em] text-muted;
+  }
+  .glow-text {
+    color: rgb(var(--ink));
+  }
+}
+
+@keyframes eq {
+  0%, 100% { transform: scaleY(0.25); }
+  50% { transform: scaleY(1); }
+}
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+[data-fx="lite"] circle,
+[data-fx="lite"] .live-meter {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

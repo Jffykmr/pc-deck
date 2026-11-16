@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.venv/
+__pycache__/
+*.pyc
+*.log
+data/config.json
+.env
+data/
+crash.txt
+run.out
+*.tsbuildinfo
+screen.off
+frontend/.impeccable/
+.env.*
+!.env.example
